@@ -1,81 +1,73 @@
-export LANG=C.UTF-8
+# Copyleft (c) 2020 Mr.Miss, All wrongs reserved.
+#
+# Redistribution and use in source with or
+# without modufication, are permitted.
 
-echo -e "\nChecking dependencies...\n"
 
-if command -v python3 >/dev/null 2>&1 ; then
-    echo -e "python3 found "
-    echo -e "version: $(python3 -V)"
-else
-    echo -e "python not found "
-    if [ "$(command -v pkg)" != "" ]; then
-        arr+=(python ) #termux python3 is in python
-    else
-        arr+=(python3 )
-    fi
-fi
+import time
+from telethon.sync import TelegramClient
+from telethon.sessions import StringSession
+from pyrogram import Client
 
-sleep 1
+select = " "
 
-if command -v wget >/dev/null 2>&1 ; then
-    echo -e "\nwget found\n"
-else
-    echo -e "\nwget not found\n"
-    arr+=(wget )
-fi
+docs = """Generate your Telegram String Session
 
-DEPENDENCIES=${arr[@]}
-sleep 1
+P -->> Pyrogram [https://docs.pyrogram.org]
+T -->> Telethon [https://docs.telethon.dev]
+"""
 
-if [ ! -z "$DEPENDENCIES" ]; then
-    echo -e "\nInstalling required dependencies\n"
-    sleep 1
+tutor = """
+~ go-to my.telegram.org
+~ Login using your Telegram account
+~ Click on API Development Tools
+~ Create a new application, by entering the required details
+~ Check your Telegram saved messages section to copy the STRING_SESSION
+"""
 
-    if [ "$(command -v pkg)" != "" ]; then # termux
-        pkg install "$DEPENDENCIES" -y
+template = """
+UserBot support: @userbotindo
+            
+<code>STRING_SESSION</code>: <code>{}</code>
 
-    elif [ "$(command -v apt-get)" != "" ]; then # debian
-        sudo apt-get install "$DEPENDENCIES" -y
+⚠️ <b>Please be carefull to pass this value to third parties</b>"""
 
-    elif [ "$(command -v pacman)" != "" ]; then # arch
-        sudo pacman -S "$DEPENDENCIES" -y
 
-# Free to PR to add others
-    else
-        echo -e "\nDistro not supported \nInstall this packages yourself: $DEPENDENCIES\n"
-    fi
+print(docs)
 
-else
-    echo -e "\nDependencies have been installed. \nContinuing to install python packages(PyPI)\n"
-    sleep 1
-fi
+while select != ("p", "t"):
+    select = input("Enter your required client < p / t > : ").lower()
+    if select == "t":
+        print("""\nTelethon selected\nRunning script...""")
+        time.sleep(1)
+        print(tutor)
+        API_KEY = int(input("Enter API_KEY here: "))
+        API_HASH = input("Enter API_HASH here: ")
 
-echo -e "\nUpgrading python pip\n"
-pip3 install --upgrade pip setuptools
-echo -e "\nInstalling telethon...\n"
-pip3 install telethon
-sleep 2
+        with TelegramClient(StringSession(), API_KEY, API_HASH) as client:
+            session_string = client.session.save()
+            saved_messages_template = "Telethon session" + template.format(session_string)
+            print("\nGenerating String Session...\n")
+            client.send_message("me", saved_messages_template, parse_mode="html")
+            time.sleep(1)
+            print("Your STRING_SESSION value have been sent to your Telegram Saved Messages")
+        break
 
-if [ ! -e string_session.py ]; then
-    echo -e "\nDownloading string_session.py\n"
-    wget https://raw.githubusercontent.com/KENZO-404/Lynx-Userbot/Lynx-Userbot/string_session.py
-
-    echo -e "\nRunning script...\n"
-    sleep 1
-    python3 string_session.py
-else
-    echo -e "\nstring_session.py detected... \nrunning file\n"
-    sleep 1
-    python3 string_session.py
-fi
-
-echo -e "Do you want to cleanup your file?"
-echo -e "[1] cleanup: this delete string_session.py and this file"
-echo -e "[2] exit"
-echo -ne "\nEnter your choice[1-2]: "
-read choice
-if [ "$choice" = "1" ]; then
-    echo -e "Cleanup: removing file"
-    rm -f string_session.py Getstring.sh
-elif [ "$choice" = "2" ]; then
-    exit
-fi
+    elif select == "p":
+        print("""\nPyrogram selected.\nRunning script...""")
+        time.sleep(1)
+        print(tutor)
+        with Client(
+        "UserBot", 
+        api_id=int(input("Enter API ID: ")),
+        api_hash=input("Enter API HASH: ")) as pyrogram:
+            saved_messages_template = "Pyrogram session" + template.format(pyrogram.export_session_string())
+            print("\nGenerating String session...\n")           
+            pyrogram.send_message("me", saved_messages_template, parse_mode="html")
+            time.sleep(1) 
+            print("Your STRING_SESSION value have been sent to your Telegram Saved Messages")
+        break
+    
+    else:
+        print("\nPlease only select P or T\n")
+        time.sleep(1.5)
