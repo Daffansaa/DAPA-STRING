@@ -26,7 +26,7 @@ tutor = """
 """
 
 template = """
-Thank you for Support ⚡𝗟𝘆𝗻𝘅-𝙐𝙎𝙀𝙍𝘽𝙊𝙏⚡
+Thank you for Support DAPA-UBOT
             
 <code>STRING_SESSION</code>: <code>{}</code>
 
